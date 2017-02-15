@@ -203,6 +203,8 @@ class Publisher
       const okvis::Time & t, const okvis::MapPointVector & actualLandmarks,
       const okvis::MapPointVector & transferredLandmarks);
 
+  void publishDenseMapAsCallback(const okvis::Time & t , const okvis::kinematics::Transformation & T_WC, const cv::Mat & depthMap, const double focalU, const double focalV, const double centerU, const double centerV);
+
   /**
    * @brief Set and write full state to CSV file.
    * @remark This can be registered with the VioInterface.
@@ -270,6 +272,7 @@ class Publisher
   ros::Publisher pubPointsMatched_; ///< The publisher for matched points.
   ros::Publisher pubPointsUnmatched_; ///< The publisher for unmatched points.
   ros::Publisher pubPointsTransferred_; ///< The publisher for transferred/marginalised points.
+  ros::Publisher pubPointsDense_; ///< The publisher for dense points.
   ros::Publisher pubObometry_;  ///< The publisher for the odometry.
   ros::Publisher pubPath_;  ///< The publisher for the path.
   ros::Publisher pubTransform_; ///< The publisher for the transform.
@@ -288,6 +291,7 @@ class Publisher
   pcl::PointCloud<pcl::PointXYZRGB> pointsMatched_; ///< Point cloud for matched points.
   pcl::PointCloud<pcl::PointXYZRGB> pointsUnmatched_; ///< Point cloud for unmatched points.
   pcl::PointCloud<pcl::PointXYZRGB> pointsTransferred_; ///< Point cloud for transferred/marginalised points.
+  pcl::PointCloud<pcl::PointXYZ> pointsDense_; ///< Point cloud for transferred/marginalised points.
   std::vector<cv::Mat> images_; ///< The images.
   nav_msgs::Path path_; ///< The path message.
   visualization_msgs::Marker meshMsg_; ///< Mesh message.

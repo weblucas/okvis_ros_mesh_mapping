@@ -98,6 +98,8 @@ void Publisher::setNodeHandle(ros::NodeHandle& nh)
       "okvis_points_unmatched", 1);
   pubPointsTransferred_ = nh_->advertise<sensor_msgs::PointCloud2>(
       "okvis_points_transferred", 1);
+  pubPointsDense_ = nh_->advertise<sensor_msgs::PointCloud2>(
+              "okvis_points_dense", 1);
   pubObometry_ = nh_->advertise<nav_msgs::Odometry>("okvis_odometry", 1);
   pubPath_ = nh_->advertise<nav_msgs::Path>("okvis_path", 1);
   pubTransform_ = nh_->advertise<geometry_msgs::TransformStamped>(
@@ -588,6 +590,56 @@ void Publisher::publishLandmarksAsCallback(
   }
 }
 
+// Set and publish dense map.
+void Publisher::publishDenseMapAsCallback(
+        const okvis::Time & t
+        , const okvis::kinematics::Transformation & T_WC
+        , const cv::Mat & depthMap,
+        const double focalU,
+        const double focalV,
+        const double centerU,
+        const double centerV)
+{
+    pointsDense_.clear();
+
+    // transform points into custom world frame:
+    okvis::kinematics::Transformation T_Wc_C = (parameters_.publishing.T_Wc_W*T_WC);
+
+    cv::Mat_<cv::Vec2f> Acc = depthMap;
+
+
+    for(int u = 0; u < Acc.cols; u++)
+    {
+        for(int v = 0; v < Acc.rows; v++)
+        {
+            float z = Acc(v,u)[0];
+            if(z < 0.2f)
+                continue;
+            float x = (((float)u - centerU)/focalU)*z;
+            float y = (((float)v - centerV)/focalV)*z;
+            pointsDense_.push_back(pcl::PointXYZ());
+            const Eigen::Vector4d point = T_Wc_C * Eigen::Vector4d(x,y,z,1);
+            pointsDense_.back().x = point[0] / point[3];
+            pointsDense_.back().y = point[1] / point[3];
+            pointsDense_.back().z = point[2] / point[3];
+        }
+    }
+
+    pointsDense_.header.frame_id = "world";
+
+    setTime(t);
+#if PCL_VERSION >= PCL_VERSION_CALC(1,7,0)
+  std_msgs::Header header;
+  header.stamp = _t;
+  pointsDense_.header.stamp = pcl_conversions::toPCL(header).stamp;
+#else
+  pointsDense_.header.stamp=_t;
+#endif
+
+    pubPointsDense_.publish(pointsDense_);
+
+}
+
 // Set and write landmarks to file.
 void Publisher::csvSaveLandmarksAsCallback(
     const okvis::Time & /*t*/, const okvis::MapPointVector & actualLandmarks,
@@ -705,3 +757,4 @@ void Publisher::publishPath()
 }
 
 }  // namespace okvis
+

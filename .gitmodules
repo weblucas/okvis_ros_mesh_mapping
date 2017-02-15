@@ -1,3 +1,4 @@
 [submodule "okvis"]
 	path = okvis
-	url = git@github.com:weblucas/okvis.git
+	url = git@github.com:weblucas/okvis_dense_mesh.git
+        branch = dense_mesh
