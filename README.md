@@ -1,3 +1,5 @@
+This is a modified version of OKVIS. Please check the page of the [mesh-based mapping repository](https://github.com/weblucas/mesh_based_mapping/)
+
 README                        {#mainpage}
 ======
 

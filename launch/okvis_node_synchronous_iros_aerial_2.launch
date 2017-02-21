@@ -1,8 +1,0 @@
-<launch>
-  <node name="okvis_node" pkg="okvis_ros" type="okvis_node_synchronous" output="screen" args="$(find okvis_ros)/config/config_fpga_v4r4.yaml /home/lucas/data/iros16/ethz_v4rl_aerial2.bag ">
-    <remap from="/camera0" to="/cam0/image_raw" />    
-    <remap from="/imu" to="/imu0" />
-    <param name="mesh_file" value="firefly.dae" />
-    <param name="prefix_topics" value="" />
-  </node>
-</launch>
