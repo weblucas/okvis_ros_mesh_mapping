@@ -2,9 +2,9 @@ This is a modified version of OKVIS ROS.  When you clone this repository with th
 
 ---
 
-Below this point, you can find the original okvis documentation.
+Below this point, you can find the original okvis ros documentation.
 
-Original OKVIS - README                        {#mainpage}
+Original OKVIS ROS - README                        {#mainpage}
 ======
 
 Welcome to OKVIS: Open Keyframe-based Visual-Inertial SLAM. 
