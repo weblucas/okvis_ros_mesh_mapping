@@ -1,6 +1,10 @@
-This is a modified version of OKVIS. Please check the page of the [mesh-based mapping repository](https://github.com/weblucas/mesh_based_mapping/)
+This is a modified version of OKVIS ROS.  When you clone this repository with the recursive parameter, it will automatically download [our modified version of OKVIS](https://github.com/weblucas/okvis_mesh_mapping). Please read the readme of the main repository of [our mesh-based mapping](https://github.com/weblucas/mesh_based_mapping/). There you can find instruction how to build and run, dataset and license.
 
-README                        {#mainpage}
+---
+
+Below this point, you can find the original okvis documentation.
+
+Original OKVIS - README                        {#mainpage}
 ======
 
 Welcome to OKVIS: Open Keyframe-based Visual-Inertial SLAM. 
