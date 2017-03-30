@@ -1,9 +1,9 @@
 <launch>
-  <arg name="bagfile" default="/home/lucas/data/iros16/ethz_v4rl_aerial2.bag" />
+  <arg name="bagfile" default="/media/lucas/Windows7_OS/dataLinux/hardturm-24-03-2017/2017-03-24-11-02-23.bag" />
   <node name="okvis_node" pkg="okvis_ros" type="okvis_node_synchronous" output="screen" args="$(find okvis_ros)/config/config_fpga_v4r4.yaml $(arg bagfile)">
-    <remap from="/camera0" to="/cam0/image_raw" />    
-    <remap from="/imu" to="/imu0" />
+    <remap from="/camera0" to="/pegasus/cam0/image_raw" />
+    <remap from="/imu" to="/pegasus/imu0" />
     <param name="mesh_file" value="firefly.dae" />
-    <param name="prefix_topics" value="" />
+    <param name="prefix_topics" value="/pegasus" />
   </node>
 </launch>
