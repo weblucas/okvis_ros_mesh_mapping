@@ -605,6 +605,26 @@ void Publisher::publishDenseMapAsCallback(
     // transform points into custom world frame:
     okvis::kinematics::Transformation T_Wc_C = (parameters_.publishing.T_Wc_W*T_WC);
 
+    {
+                meshPoseMsg_.child_frame_id = "mesh_ref";
+                meshPoseMsg_.header.frame_id = "world";
+                meshPoseMsg_.header.stamp = ros::Time(t.sec, t.nsec);
+
+                // fill orientation
+                Eigen::Quaterniond q = T_Wc_C.q();
+                meshPoseMsg_.transform.rotation.x = q.x();
+                meshPoseMsg_.transform.rotation.y = q.y();
+                meshPoseMsg_.transform.rotation.z = q.z();
+                meshPoseMsg_.transform.rotation.w = q.w();
+
+                // fill position
+                Eigen::Vector3d r = T_Wc_C.r();
+                meshPoseMsg_.transform.translation.x = r[0];
+                meshPoseMsg_.transform.translation.y = r[1];
+                meshPoseMsg_.transform.translation.z = r[2];
+                pubTf_.sendTransform(meshPoseMsg_);
+    }
+
     cv::Mat_<cv::Vec2f> Acc = depthMap;
 
 
@@ -617,24 +637,24 @@ void Publisher::publishDenseMapAsCallback(
                 continue;
             float x = (((float)u - centerU)/focalU)*z;
             float y = (((float)v - centerV)/focalV)*z;
-            pointsDense_.push_back(pcl::PointXYZ());
-            const Eigen::Vector4d point = T_Wc_C * Eigen::Vector4d(x,y,z,1);
-            pointsDense_.back().x = point[0] / point[3];
-            pointsDense_.back().y = point[1] / point[3];
-            pointsDense_.back().z = point[2] / point[3];
+            pointsDense_.push_back(pcl::PointXYZ());            
+            pointsDense_.back().x = x;
+            pointsDense_.back().y = y;
+            pointsDense_.back().z = z;
         }
     }
 
-    pointsDense_.header.frame_id = "world";
+    pointsDense_.header.frame_id = "mesh_ref";
 
-    setTime(t);
-#if PCL_VERSION >= PCL_VERSION_CALC(1,7,0)
+    //setTime(t);
+//#if PCL_VERSION >= PCL_VERSION_CALC(1,7,0)
   std_msgs::Header header;
-  header.stamp = _t;
+  header.stamp = ros::Time(t.sec, t.nsec);
   pointsDense_.header.stamp = pcl_conversions::toPCL(header).stamp;
-#else
-  pointsDense_.header.stamp=_t;
-#endif
+
+//#else
+//  pointsDense_.header.stamp=_t;
+//#endif
 
     pubPointsDense_.publish(pointsDense_);
 

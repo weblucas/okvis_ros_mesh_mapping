@@ -286,6 +286,7 @@ class Publisher
 
   ros::Time _t; ///< Header timestamp.
   geometry_msgs::TransformStamped poseMsg_; ///< Pose message.
+  geometry_msgs::TransformStamped meshPoseMsg_; ///< Pose message.
   nav_msgs::Odometry odometryMsg_;  ///< Odometry message.
   okvis::MapPointVector pointsMatched2_;  ///< Matched points vector.
   pcl::PointCloud<pcl::PointXYZRGB> pointsMatched_; ///< Point cloud for matched points.
