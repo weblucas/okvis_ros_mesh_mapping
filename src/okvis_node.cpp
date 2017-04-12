@@ -83,12 +83,40 @@ int main(int argc, char **argv)
   okvis::VioParameters parameters;
   vio_parameters_reader.getParameters(parameters);
 
+  std::string typeText;
+  if(nh.getParam("type_pointcloud_output",typeText)) {
+     if(typeText == "sparse")
+     {
+        parameters.publishing.publishCameraCentricLandmarks = true;
+        parameters.publishing.publishDenseLandmarks = false;
+     }else if(typeText == "dense")
+     {
+         parameters.publishing.publishCameraCentricLandmarks = false;
+         parameters.publishing.publishDenseLandmarks = true;
+     }else
+     {
+         parameters.publishing.publishCameraCentricLandmarks = false;
+         parameters.publishing.publishDenseLandmarks = false;
+     }
+  }
+    bool force_gui_off;
+  if(nh.getParam("force_gui_off",force_gui_off)) {
+    if(force_gui_off)
+     {
+           LOG(WARNING) << "Disabling the okvis gui";
+        parameters.visualization.displayImages = false;
+     }
+  }
+
+
   okvis::ThreadedKFVio okvis_estimator(parameters);
 
   okvis_estimator.setFullStateCallback(std::bind(&okvis::Publisher::publishFullStateAsCallback,&publisher,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3,std::placeholders::_4));
   okvis_estimator.setLandmarksCallback(std::bind(&okvis::Publisher::publishLandmarksAsCallback,&publisher,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3));
   okvis_estimator.setStateCallback(std::bind(&okvis::Publisher::publishStateAsCallback,&publisher,std::placeholders::_1,std::placeholders::_2));
   okvis_estimator.setDenseCallback(std::bind(&okvis::Publisher::publishDenseMapAsCallback,&publisher,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3,std::placeholders::_4,std::placeholders::_5,std::placeholders::_6,std::placeholders::_7));
+  okvis_estimator.setCameraLandmarksCallback(std::bind(&okvis::Publisher::publishCameraLandmarksMapAsCallback,&publisher,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3));
+
   publisher.setParameters(parameters); // pass the specified publishing stuff
 
   // subscriber

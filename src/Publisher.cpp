@@ -100,6 +100,8 @@ void Publisher::setNodeHandle(ros::NodeHandle& nh)
       "okvis_points_transferred", 1);
   pubPointsDense_ = nh_->advertise<sensor_msgs::PointCloud2>(
               "okvis_points_dense", 1);
+  pubPointsCameraLandmarks_ = nh_->advertise<sensor_msgs::PointCloud2>(
+              "okvis_points_cam_landmarks", 1);
   pubObometry_ = nh_->advertise<nav_msgs::Odometry>("okvis_odometry", 1);
   pubPath_ = nh_->advertise<nav_msgs::Path>("okvis_path", 1);
   pubTransform_ = nh_->advertise<geometry_msgs::TransformStamped>(
@@ -588,6 +590,67 @@ void Publisher::publishLandmarksAsCallback(
     setPoints(actualLandmarks, empty, transferredLandmarks);
     publishPoints();
   }
+}
+
+void Publisher::publishCameraLandmarksMapAsCallback(const okvis::Time & t,
+     const okvis::kinematics::Transformation & T_WC,
+     const okvis::MapPointVector & pointsMatched)
+{
+    pointsCameraLandmarks_.clear();
+    okvis::kinematics::Transformation T_Wc_C = (parameters_.publishing.T_Wc_W*T_WC);
+    {
+        camLandmarksPoseMsg_.child_frame_id = "camlandmarks_ref";
+        camLandmarksPoseMsg_.header.frame_id = "world";
+        camLandmarksPoseMsg_.header.stamp = ros::Time(t.sec, t.nsec);
+
+        // fill orientation
+        Eigen::Quaterniond q = T_Wc_C.q();
+        camLandmarksPoseMsg_.transform.rotation.x = q.x();
+        camLandmarksPoseMsg_.transform.rotation.y = q.y();
+        camLandmarksPoseMsg_.transform.rotation.z = q.z();
+        camLandmarksPoseMsg_.transform.rotation.w = q.w();
+
+        // fill position
+        Eigen::Vector3d r = T_Wc_C.r();
+        camLandmarksPoseMsg_.transform.translation.x = r[0];
+        camLandmarksPoseMsg_.transform.translation.y = r[1];
+        camLandmarksPoseMsg_.transform.translation.z = r[2];
+        pubTf_.sendTransform(camLandmarksPoseMsg_);
+    }
+
+    okvis::kinematics::Transformation T_CRefW =  T_WC.inverse();
+
+      for (unsigned int i = 0 ; i < pointsMatched.size() ; i++) {
+
+        if (pointsMatched[i].point(3) < 1.0e-8) {
+          continue;
+        }
+
+        if (pointsMatched[i].quality < parameters_.publishing.landmarkQualityThreshold) {
+          continue;
+        }
+
+        Eigen::Vector4d pt_CRef = T_CRefW * pointsMatched[i].point;
+
+        pt_CRef(0) = pt_CRef(0) / pt_CRef(3);
+        pt_CRef(1) = pt_CRef(1) / pt_CRef(3);
+        pt_CRef(2) = pt_CRef(2) / pt_CRef(3);
+
+
+        if (pt_CRef(2) > parameters_.publishing.minCameraLandmarkDistance) {
+            pointsCameraLandmarks_.push_back(pcl::PointXYZ());
+            pointsCameraLandmarks_.back().x = pt_CRef(0);
+            pointsCameraLandmarks_.back().y = pt_CRef(1);
+            pointsCameraLandmarks_.back().z = pt_CRef(2);
+        }
+      }
+
+    pointsCameraLandmarks_.header.frame_id = "camlandmarks_ref";
+
+    std_msgs::Header header;
+    header.stamp = ros::Time(t.sec, t.nsec);
+    pointsCameraLandmarks_.header.stamp = pcl_conversions::toPCL(header).stamp;
+    pubPointsCameraLandmarks_.publish(pointsCameraLandmarks_);
 }
 
 // Set and publish dense map.

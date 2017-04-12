@@ -205,6 +205,8 @@ class Publisher
 
   void publishDenseMapAsCallback(const okvis::Time & t , const okvis::kinematics::Transformation & T_WC, const cv::Mat & depthMap, const double focalU, const double focalV, const double centerU, const double centerV);
 
+  void publishCameraLandmarksMapAsCallback(const okvis::Time &t, const okvis::kinematics::Transformation &T_WC, const okvis::MapPointVector &);
+
   /**
    * @brief Set and write full state to CSV file.
    * @remark This can be registered with the VioInterface.
@@ -257,7 +259,8 @@ class Publisher
 
   /// @}
 
- private:
+
+private:
 
   /// @brief Write CSV header.
   bool writeCsvDescription();
@@ -273,6 +276,8 @@ class Publisher
   ros::Publisher pubPointsUnmatched_; ///< The publisher for unmatched points.
   ros::Publisher pubPointsTransferred_; ///< The publisher for transferred/marginalised points.
   ros::Publisher pubPointsDense_; ///< The publisher for dense points.
+  ros::Publisher pubPointsCameraLandmarks_; ///< The publisher for dense points.
+
   ros::Publisher pubObometry_;  ///< The publisher for the odometry.
   ros::Publisher pubPath_;  ///< The publisher for the path.
   ros::Publisher pubTransform_; ///< The publisher for the transform.
@@ -287,12 +292,14 @@ class Publisher
   ros::Time _t; ///< Header timestamp.
   geometry_msgs::TransformStamped poseMsg_; ///< Pose message.
   geometry_msgs::TransformStamped meshPoseMsg_; ///< Pose message.
+  geometry_msgs::TransformStamped camLandmarksPoseMsg_; ///< Pose message.
   nav_msgs::Odometry odometryMsg_;  ///< Odometry message.
   okvis::MapPointVector pointsMatched2_;  ///< Matched points vector.
   pcl::PointCloud<pcl::PointXYZRGB> pointsMatched_; ///< Point cloud for matched points.
   pcl::PointCloud<pcl::PointXYZRGB> pointsUnmatched_; ///< Point cloud for unmatched points.
   pcl::PointCloud<pcl::PointXYZRGB> pointsTransferred_; ///< Point cloud for transferred/marginalised points.
   pcl::PointCloud<pcl::PointXYZ> pointsDense_; ///< Point cloud for transferred/marginalised points.
+  pcl::PointCloud<pcl::PointXYZ> pointsCameraLandmarks_; ///< Point cloud for transferred/marginalised points.
   std::vector<cv::Mat> images_; ///< The images.
   nav_msgs::Path path_; ///< The path message.
   visualization_msgs::Marker meshMsg_; ///< Mesh message.
